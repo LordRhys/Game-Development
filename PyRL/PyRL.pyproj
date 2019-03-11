@@ -1,0 +1,97 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>7fff5d68-ace7-406a-b9c0-fc5b2495716d</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>engine.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>PyRL</Name>
+    <RootNamespace>PyRL</RootNamespace>
+    <InterpreterId>Global|PythonCore|3.6-32</InterpreterId>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="components\ai.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="components\fighter.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="components\inventory.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="components\item.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="components\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="death_functions.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="engine.py" />
+    <Compile Include="entity.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="fov_functions.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game_messages.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game_states.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="input_handlers.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="item_functions.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="map_objects\game_map.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="map_objects\rectangle.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="map_objects\tile.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="map_objects\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="menus.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="render_functions.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.6-32" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="components\" />
+    <Folder Include="map_objects\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
