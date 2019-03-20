@@ -20,6 +20,8 @@ class Inventory:
                 'item_added': item,
                 'message': Message('You picked up the {0}!'.format(item.name), libt.blue)})
 
+        self.items.append(item)
+
         return results
 
     def use(self, item_entity, **kwargs):
@@ -37,11 +39,11 @@ class Inventory:
                 kwargs = {**item_component.function_kwargs, **kwargs}
                 item_use_results = item_component.use_function(self.owner, **kwargs)
 
-            for item_use_result in item_use_results:
-                if item_use_result.get('consumed'):
-                    self.remove_item(item_entity)
+                for item_use_result in item_use_results:
+                    if item_use_result.get('consumed'):
+                        self.remove_item(item_entity)
 
-            results.extend(item_use_results)
+                results.extend(item_use_results)
 
         return results
 

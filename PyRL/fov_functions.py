@@ -8,7 +8,7 @@ def initialize_fov(game_map):
             libt.map_set_properties(fov_map, x, y, not game_map.tiles[x][y].block_sight,
                                     not game_map.tiles[x][y].blocked)
 
-        return fov_map
+    return fov_map
 
 def recompute_fov(fov_map, x, y, radius, light_walls=True, algorithm=0):
     libt.map_compute_fov(fov_map, x, y, radius, light_walls, algorithm)

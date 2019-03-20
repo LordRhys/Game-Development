@@ -2,11 +2,13 @@ import tcod as libt
 from game_messages import Message
 
 class Fighter:
-    def __init__(self, hp, defense, power):
+    def __init__(self, hp, defense, power, xp=0, coins=0):
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
         self.power = power
+        self.xp = xp
+        self.coins = coins  # for use later with npc merchants, coins dropped by mobs or sold items
 
     def take_damage(self, amount):
         results = []
@@ -14,7 +16,7 @@ class Fighter:
         self.hp -= amount
 
         if self.hp <= 0:
-            results.append({'dead': self.owner})
+            results.append({'dead': self.owner, 'xp': self.xp, 'coins': self.coins})
 
         return results
 
@@ -24,6 +26,14 @@ class Fighter:
         if self.hp > self.max_hp:
             self.hp = self.max_hp
 
+    def add_coins(self, coins):
+        self.coins += coins        
+
+    def spend_coins(self, coins):
+        if self.coins - coins < 0:
+            return None # add message about not enough coins
+
+        self.coins -= coins 
 
     def attack(self, target):
         results = []

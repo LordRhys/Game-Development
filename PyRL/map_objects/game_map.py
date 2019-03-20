@@ -6,19 +6,24 @@ from components.fighter import Fighter
 from components.item import Item
 
 from entity import Entity
+from components.stairs import Stairs
 from game_messages import Message
 from item_functions import heal, cast_lightning, cast_fireball, cast_confuse
 from map_objects.rectangle import Rect
 from map_objects.tile import Tile
+from random_utils import random_choice_from_dict
 from render_functions import RenderOrder
+from map_objects.bsp_map import BSPTree
 
 
 class GameMap:
     
-    def __init__(self, width, height):
+    def __init__(self, width, height, dungeon_level=1):
         self.width = width
         self.height = height
         self.tiles = self.initialize_tiles()
+
+        self.dungeon_level = dungeon_level
 
     def initialize_tiles(self):
         """
@@ -34,6 +39,9 @@ class GameMap:
         
         rooms = []
         num_rooms = 0
+
+        center_of_last_room_x = None
+        center_of_last_room_y = None
 
         for r in range(max_rooms):
             # random width and height
@@ -59,6 +67,9 @@ class GameMap:
 
                 # center coordinates of the new room, useful later
                 (new_x, new_y) = new_room.center()
+
+                center_of_last_room_x = new_x
+                center_of_last_room_y = new_y
 
                 if num_rooms == 0:
                     # this is the first room, where player starts at
@@ -87,6 +98,11 @@ class GameMap:
                 rooms.append(new_room)
                 num_rooms += 1
 
+        stairs_component = Stairs(self.dungeon_level + 1)
+        down_stairs = Entity(center_of_last_room_x, center_of_last_room_y, '>', libt.white, 'Stairs',
+                             render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        entities.append(down_stairs)
+
 
 
     def create_room(self, room):
@@ -111,6 +127,10 @@ class GameMap:
         number_of_monsters = randint(0, max_monters_per_room)
         number_of_items = randint(0, max_items_per_room)
 
+        monster_chances = {'orc': 80, 'troll': 20}
+        item_chances = {'healing_potion': 70, 'lightning_scroll': 10, 'fireball_scroll': 10,
+                        'confusion_scroll': 10}
+
         for i in range(number_of_monsters):
             # choose a random location in the room
             x = randint(room.x1 + 1, room.x2 - 1)
@@ -118,15 +138,19 @@ class GameMap:
 
             if not any([entity for entity in entities if entity.x == x and
                        entity.y == y]):
-                if randint(0, 100) < 80:
-                    fighter_component = Fighter(hp=10, defense=0, power=3)
+                monster_choice = random_choice_from_dict(monster_chances)
+
+                if monster_choice == 'orc':
+                    treasure_drop = randint(1,20)
+                    fighter_component = Fighter(hp=10, defense=0, power=1, xp=35, coins=treasure_drop)
                     ai_component = BasicMonster()
-                    monster = Entity(x, y, 'o', libt.desaturated_green, 'Orc', blocks=True, render_order=RenderOrder.ACTOR,
+                    monster = Entity(x, y, 'o', libt.desaturated_green, 'Orc', blocks=True, render_order=RenderOrder.ACTOR, 
                                      fighter=fighter_component, ai=ai_component)
                 else:
-                    fighter_component = Fighter(hp=16, defense=1, power=4)
+                    treasure_drop = randint(1,50)
+                    fighter_component = Fighter(hp=16, defense=1, power=1, xp=100, coins=treasure_drop)
                     ai_component = BasicMonster()
-                    monster = Entity(x, y, 'T', libt.darker_green, 'Troll', blocks=True, render_order=RenderOrder.ACTOR,
+                    monster = Entity(x, y, 'T', libt.darker_green, 'Troll', blocks=True, render_order=RenderOrder.ACTOR, 
                                      fighter=fighter_component, ai=ai_component)
 
                 entities.append(monster)
@@ -138,18 +162,19 @@ class GameMap:
 
             if not any([entity for entity in entities if entity.x == x and
                        entity.y == y]):
-                item_chance = randint(0, 100)
-                if item_chance < 70:
+                item_choice = random_choice_from_dict(item_chances)
+
+                if item_choice == 'healing_potion':
                     item_component = Item(use_function=heal, amount=4)
                     item = Entity(x, y, '!', libt.violet, 'Healing Potion', render_order=RenderOrder.ITEM, 
                                   item=item_component)
-                elif item_chance < 80:
+                elif item_choice == 'fireball_scroll':
                     item_component = Item(use_function=cast_fireball, targeting=True, targeting_message=Message(
                         'Left-click a target tile for the fireball, or right-click to cancel.', libt.light_cyan),
                                          damage=12, radius=3)
                     item = Entity(x, y, '#', libt.red, 'Fireball Scroll', render_order=RenderOrder.ITEM, 
                                   item=item_component)
-                elif item_chance < 85:
+                elif item_choice == 'confusion_scroll':
                     item_component = Item(use_function=cast_confuse, targeting=True, targeting_message=Message(
                         'Left-click an enemy to confuse it, or right-click to cancel.', libt.light_cyan))
                     item = Entity(x, y, '#', libt.light_pink, 'Confusion Scroll', render_order=RenderOrder.ITEM, 
@@ -161,9 +186,29 @@ class GameMap:
                 
                 entities.append(item)
 
+
     def is_blocked(self, x, y):
         if self.tiles[x][y].blocked:
             return True
 
         return False
 
+    def next_floor(self, player, message_log, constants):
+        self.dungeon_level += 1
+        entities = [player]
+
+        #self.tiles = self.initialize_tiles()
+        # Later modify this to randomly pick a style of map (i.e. past lvl 3 could be caves or combo)
+        #self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], 
+        #              constants['map_height'], player, entities, constants['max_monsters_per_room'], constants['max_items_per_room'])
+        bsp_map = BSPTree(constants['map_width'], constants['map_height'], self.dungeon_level)
+    
+        bsp_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, constants['max_monsters_per_room'], constants['max_items_per_room'])
+
+        player.fighter.heal(player.fighter.max_hp/2)
+
+        message_log.add_message(Message('You take a moment to rest, and recover your strength.', libt.light_violet))
+
+        return entities
+
+    
